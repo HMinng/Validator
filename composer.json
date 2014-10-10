@@ -7,9 +7,14 @@
             "email": "jackhm18@gmail.com"
         }
     ],
-    
-    "require": {
 
+    "repositories" : [
+        {"type" : "composer", "url" : "https://packagist.org/"}
+    ],
+
+    "require": {
+        "symfony/http-foundation": "2.4.*",
+        "symfony/translation": "2.4.*"
     },
     
     "autoload": {
