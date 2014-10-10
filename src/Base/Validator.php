@@ -23,7 +23,7 @@ class Validator implements MessageProviderInterface {
 	/**
 	 * The Presence Verifier implementation.
 	 *
-	 * @var \Illuminate\Validation\PresenceVerifierInterface
+	 * @var \HMinng\Validator\Base\PresenceVerifierInterface
 	 */
 	protected $presenceVerifier;
 
@@ -37,7 +37,7 @@ class Validator implements MessageProviderInterface {
 	/**
 	 * The message bag instance.
 	 *
-	 * @var \Illuminate\Support\MessageBag
+	 * @var \HMinng\Validator\Base\MessageBag
 	 */
 	protected $messages;
 
@@ -128,7 +128,6 @@ class Validator implements MessageProviderInterface {
 	 * @param  array  $rules
 	 * @param  array  $messages
 	 * @param  array  $customAttributes
-	 * @return void
 	 */
 	public function __construct(TranslatorInterface $translator, array $data, array $rules, array $messages = array(), array $customAttributes = array())
 	{
@@ -173,7 +172,7 @@ class Validator implements MessageProviderInterface {
 	 */
 	protected function explodeRules($rules)
 	{
-		foreach ($rules as $key => &$rule)
+		foreach ($rules as &$rule)
 		{
 			$rule = (is_string($rule)) ? explode('|', $rule) : $rule;
 		}
@@ -1922,7 +1921,7 @@ class Validator implements MessageProviderInterface {
 	 * Set the validation rules.
 	 *
 	 * @param  array  $rules
-	 * @return \Illuminate\Validation\Validator
+	 * @return \HMinng\Validator\Base\Validator
 	 */
 	public function setRules(array $rules)
 	{
@@ -1935,7 +1934,7 @@ class Validator implements MessageProviderInterface {
 	 * Set the custom attributes on the validator.
 	 *
 	 * @param  array  $attributes
-	 * @return \Illuminate\Validation\Validator
+	 * @return \HMinng\Validator\Base\Validator
 	 */
 	public function setAttributeNames(array $attributes)
 	{
@@ -1958,7 +1957,7 @@ class Validator implements MessageProviderInterface {
 	 * Set the files under validation.
 	 *
 	 * @param  array  $files
-	 * @return \Illuminate\Validation\Validator
+	 * @return \HMinng\Validator\Base\Validator
 	 */
 	public function setFiles(array $files)
 	{
@@ -1970,7 +1969,7 @@ class Validator implements MessageProviderInterface {
 	/**
 	 * Get the Presence Verifier implementation.
 	 *
-	 * @return \Illuminate\Validation\PresenceVerifierInterface
+	 * @return \HMinng\Validator\Base\PresenceVerifierInterface
 	 *
 	 * @throws \RuntimeException
 	 */
@@ -1987,7 +1986,7 @@ class Validator implements MessageProviderInterface {
 	/**
 	 * Set the Presence Verifier implementation.
 	 *
-	 * @param  \Illuminate\Validation\PresenceVerifierInterface  $presenceVerifier
+	 * @param  \HMinng\Validator\Base\PresenceVerifierInterface  $presenceVerifier
 	 * @return void
 	 */
 	public function setPresenceVerifier(PresenceVerifierInterface $presenceVerifier)
@@ -2071,7 +2070,7 @@ class Validator implements MessageProviderInterface {
 	/**
 	 * Get the message container for the validator.
 	 *
-	 * @return \Illuminate\Support\MessageBag
+	 * @return \HMinng\Validator\Base\MessageBag
 	 */
 	public function messages()
 	{
@@ -2083,7 +2082,7 @@ class Validator implements MessageProviderInterface {
 	/**
 	 * An alternative more semantic shortcut to the message container.
 	 *
-	 * @return \Illuminate\Support\MessageBag
+	 * @return \HMinng\Validator\Base\MessageBag
 	 */
 	public function errors()
 	{
@@ -2095,7 +2094,7 @@ class Validator implements MessageProviderInterface {
 	/**
 	 * Get the messages for the instance.
 	 *
-	 * @return \Illuminate\Support\MessageBag
+	 * @return \HMinng\Validator\Base\MessageBag
 	 */
 	public function getMessageBag()
 	{
@@ -2105,7 +2104,7 @@ class Validator implements MessageProviderInterface {
 	/**
 	 * Set the IoC container instance.
 	 *
-	 * @param  \Illuminate\Container\Container  $container
+	 * @param  \HMinng\Validator\Base\Container  $container
 	 * @return void
 	 */
 	public function setContainer(Container $container)
