@@ -1,5 +1,5 @@
 <?php
-namespace HMinng\Validator\Contracts;
+namespace HMinng\Validator\Verifier;
 
 interface PresenceVerifierInterface {
 
