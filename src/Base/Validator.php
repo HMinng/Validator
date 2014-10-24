@@ -5,6 +5,7 @@ use DateTime;
 use HMinng\Validator\Utils\Utils;
 use HMinng\Validator\Verifier\PresenceVerifierInterface;
 use Symfony\Component\HttpFoundation\File\File;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class Validator
 {
@@ -45,6 +46,13 @@ class Validator
     protected $fallbackMessages = array();
 
     /**
+     * The array of custom attribute names.
+     *
+     * @var array
+     */
+    protected $customAttributes = array();
+
+    /**
      * The array of custom error messages.
      *
      * @var array
@@ -70,7 +78,7 @@ class Validator
      *
      * @var array
      */
-    protected $numericRules = array('Numeric', 'Integer');
+    protected $numericRules = array('Numeric', 'Integer', 'Max', 'Min', 'Size');
 
     /**
      * The validation rules that imply the field is required.
@@ -225,7 +233,7 @@ class Validator
             return $value;
         }
 
-        return true;
+        return false;
     }
 
     /**
@@ -632,9 +640,18 @@ class Validator
     {
         $this->requireParameterCount(1, $parameters, 'max');
 
+        if ($value instanceof UploadedFile && ! $value->isValid()) return false;
+
         return $this->getSize($attribute, $value) <= $parameters[0];
     }
 
+    /**
+     * Get the size of an attribute.
+     *
+     * @param  string  $attribute
+     * @param  mixed   $value
+     * @return mixed
+     */
     /**
      * Get the size of an attribute.
      *
@@ -654,6 +671,8 @@ class Validator
             return Utils::arrayGet($this->data, $attribute);
         } elseif (is_array($value)) {
             return count($value);
+        } elseif ($value instanceof File) {
+            return $value->getSize() / 1024;
         } else {
             return $this->getStringSize($value);
         }
@@ -1066,8 +1085,7 @@ class Validator
      */
     public function getPresenceVerifier()
     {
-        if (is_null($this->presenceVerifier))
-        {
+        if (is_null($this->presenceVerifier)) {
             throw new \RuntimeException("Presence verifier has not been set.");
         }
 
@@ -1117,6 +1135,7 @@ class Validator
         // The Symfony File class should do a decent job of guessing the extension
         // based on the true MIME type so we'll just loop through the array of
         // extensions and compare it to the guessed extension of the files.
+        /** @var UploadedFile $value */
         if ($value->isValid() && $value->getPath() != '') {
             return in_array($value->guessExtension(), $parameters);
         } else {
@@ -1147,5 +1166,163 @@ class Validator
         return $this;
     }
 
+    /**
+     * Validate that an attribute exists when another attribute has a given value.
+     *
+     * @param  string  $attribute
+     * @param  mixed   $value
+     * @param  mixed   $parameters
+     * @return bool
+     */
+    protected function validateRequiredIf($attribute, $value, $parameters)
+    {
+        $this->requireParameterCount(2, $parameters, 'required_if');
 
+        if ($parameters[1] == Utils::arrayGet($this->data, $parameters[0])) {
+            return $this->validateRequired($attribute, $value);
+        }
+
+        return true;
+    }
+
+    /**
+     * Validate that an attribute exists when any other attribute exists.
+     *
+     * @param  string  $attribute
+     * @param  mixed   $value
+     * @param  mixed   $parameters
+     * @return bool
+     */
+    protected function validateRequiredWith($attribute, $value, $parameters)
+    {
+        if ( ! $this->allFailingRequired($parameters)) {
+            return $this->validateRequired($attribute, $value);
+        }
+
+        return true;
+    }
+
+    /**
+     * Determine if all of the given attributes fail the required test.
+     *
+     * @param  array  $attributes
+     * @return bool
+     */
+    protected function allFailingRequired(array $attributes)
+    {
+        foreach ($attributes as $key) {
+            if ($this->validateRequired($key, $this->getValue($key))) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Validate that an attribute exists when another attribute does not.
+     *
+     * @param  string  $attribute
+     * @param  mixed   $value
+     * @param  mixed   $parameters
+     * @return bool
+     */
+    protected function validateRequiredWithout($attribute, $value, $parameters)
+    {
+        if ($this->anyFailingRequired($parameters)) {
+            return $this->validateRequired($attribute, $value);
+        }
+
+        return true;
+    }
+
+    /**
+     * Determine if any of the given attributes fail the required test.
+     *
+     * @param  array  $attributes
+     * @return bool
+     */
+    protected function anyFailingRequired(array $attributes)
+    {
+        foreach ($attributes as $key) {
+            if ( ! $this->validateRequired($key, $this->getValue($key))) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Validate that an attribute exists when all other attributes do not.
+     *
+     * @param  string  $attribute
+     * @param  mixed   $value
+     * @param  mixed   $parameters
+     * @return bool
+     */
+    protected function validateRequiredWithoutAll($attribute, $value, $parameters)
+    {
+        if ($this->allFailingRequired($parameters)) {
+            return $this->validateRequired($attribute, $value);
+        }
+
+        return true;
+    }
+
+    /**
+     * Validate that an attribute exists when all other attributes exists.
+     *
+     * @param  string  $attribute
+     * @param  mixed   $value
+     * @param  mixed   $parameters
+     * @return bool
+     */
+    protected function validateRequiredWithAll($attribute, $value, $parameters)
+    {
+        if ( ! $this->anyFailingRequired($parameters)) {
+            return $this->validateRequired($attribute, $value);
+        }
+
+        return true;
+    }
+
+    /**
+     * Validate the uniqueness of an attribute value on a given database table.
+     *
+     * If a database column is not specified, the attribute will be used.
+     *
+     * @param  string  $attribute
+     * @param  mixed   $value
+     * @param  array   $parameters
+     * @return bool
+     */
+    protected function validateUnique($attribute, $value, $parameters)
+    {
+        $this->requireParameterCount(1, $parameters, 'unique');
+
+        $table = $parameters[0];
+
+        // The second parameter position holds the name of the column that needs to
+        // be verified as unique. If this parameter isn't specified we will just
+        // assume that this column to be verified shares the attribute's name.
+        $column = isset($parameters[1]) ? $parameters[1] : $attribute;
+
+        list($idColumn, $id) = array(null, null);
+
+        if (isset($parameters[2])) {
+            list($idColumn, $id) = $this->getUniqueIds($parameters);
+
+            if (strtolower($id) == 'null') $id = null;
+        }
+
+        // The presence verifier is responsible for counting rows within this store
+        // mechanism which might be a relational database or any other permanent
+        // data store like Redis, etc. We will use it to determine uniqueness.
+        $verifier = $this->getPresenceVerifier();
+
+        $extra = $this->getUniqueExtra($parameters);
+
+        return $verifier->getCount($table, $column, $value, $id, $idColumn, $extra) == 0;
+    }
 }
