@@ -31,6 +31,12 @@ class Validator
     protected $rules;
 
     /**
+     * Application scenarios
+     * @var string
+     */
+    protected $scene;
+
+    /**
      * The files under validation.
      *
      * @var array
@@ -97,11 +103,12 @@ class Validator
      * @param  array $messages
      * @return \HMinng\Validator\Base\Validator
      */
-    public function __construct(array $data, array $rules, array $messages = array())
+    public function __construct(array $data, array $rules, array $messages = array(), $scene)
     {
         $this->customMessages = $messages;
         $this->data = $this->parseData($data);
         $this->rules = $this->explodeRules($rules);
+        $this->scene = $scene;
     }
 
     /**
@@ -161,9 +168,12 @@ class Validator
      */
     public function passes()
     {
-        foreach ($this->rules as $attribute => $rules) {
-            foreach ($rules as $rule) {
-                $this->validate($attribute, $rule);
+        foreach ($this->rules as $attribute => &$rules) {
+            $scenes = array_pop($rules);
+            if (in_array($this->scene, $scenes) || $scenes == 'all') {
+                foreach ($rules as $rule) {
+                    $this->validate($attribute, $rule);
+                }
             }
         }
 

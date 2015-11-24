@@ -12,11 +12,11 @@ abstract class AtsRuleBaseClass
         return true;
     }
 
-	public static function validator($params = array())
+	public static function validator($params = array(), $scene = 'all')
 	{
 		$class = get_called_class();
 
-        $validator = new Validator($params, $class::rules(), $class::messages());
+        $validator = new Validator($params, $class::rules(), $class::messages(), $scene);
 
         $class::setPresenceVerifier($validator);
 
