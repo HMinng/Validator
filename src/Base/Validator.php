@@ -174,6 +174,8 @@ class Validator
                 foreach ($rules as $rule) {
                     $this->validate($attribute, $rule);
                 }
+            } else {
+                throw new \Exception('未发现需要验证的场景');break;
             }
         }
 
