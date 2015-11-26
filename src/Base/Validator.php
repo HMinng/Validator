@@ -1341,4 +1341,17 @@ class Validator
 
         return $verifier->getCount($table, $column, $value, $id, $idColumn, $extra) == 0;
     }
+
+    /**
+     * "Validate" optional attributes.
+     *
+     * Always returns true, just lets us put sometimes in rules.
+     *
+     * @return bool
+     */
+    protected function validateSometimes()
+    {
+        return true;
+    }
+
 }
