@@ -168,15 +168,19 @@ class Validator
      */
     public function passes()
     {
+        $num = 0;
         foreach ($this->rules as $attribute => &$rules) {
             $scenes = array_pop($rules);
             if (in_array($this->scene, $scenes) || $scenes == 'all') {
+                $num ++;
                 foreach ($rules as $rule) {
                     $this->validate($attribute, $rule);
                 }
-            } else {
-                throw new \Exception('未发现需要验证的场景');break;
             }
+        }
+
+        if ($num == 0) {
+            throw new \Exception('未发现需要验证的场景');
         }
 
         return count($this->fallbackMessages) === 0;
