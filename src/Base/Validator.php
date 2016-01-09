@@ -170,8 +170,18 @@ class Validator
     {
         $num = 0;
         foreach ($this->rules as $attribute => &$rules) {
-            $scenes = array_pop($rules);
-            if (in_array($this->scene, $scenes) || $scenes == 'all') {
+
+            if ($this->scene == 'all') {
+                $scenes = array('all');
+            } else {
+                $scenes = array_pop($rules);
+            }
+
+            if ( ! is_array($scenes)) {
+                throw new \Exception('请先定义需要检查的场景');
+            }
+
+            if (in_array($this->scene, $scenes)) {
                 $num ++;
                 foreach ($rules as $rule) {
                     $this->validate($attribute, $rule);
