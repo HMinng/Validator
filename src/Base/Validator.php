@@ -1364,4 +1364,74 @@ class Validator
         return true;
     }
 
+    /**
+     * Verify that a property is an ID number.
+     *
+     * @param  string  $attribute
+     * @param  mixed   $value
+     * @param  mixed   $parameters
+     * @return bool
+     */
+    protected function validateID($attribute, $value)
+    {
+        $address = yaml_parse_file(APPLICATION_PATH . '/../conf/custom/area.yml');
+
+        if ( ! $attribute) {
+            return false;
+        }
+
+        if ( ! is_numeric($value)) {
+            return false;
+        }
+
+        if (strlen($value) == 15) {
+            return true;
+        }
+
+        if (strlen($value) != 18) {
+            return false;
+        }
+
+        $province = $value{0} . $value{1} . '0000';
+        $city = $value{0} . $value{1} . $value{2} . $value{3} . '00';
+        $area = $value{0} . $value{1} . $value{2} . $value{3} . $value{4} . $value{5};
+
+        if ( ! array_key_exists($province, $address['is_card']['province'])) {
+            return false;
+        }
+
+        if ( ! array_key_exists($city, $address['is_card']['city'][$province])) {
+            return false;
+        }
+
+        if ( ! array_key_exists($area, $address['is_card']['area'][$city])) {
+           return false;
+        }
+
+        $middle = substr($value, 6, 11);
+
+        $regex = '/^(1|2){1}(0|1|9){1}[0-9]{2}(0|1){1}[0-9]{1}(0|1|2|3){1}[0-9]{1}[0-9]{3}$/';
+
+        if ( ! preg_match($regex, $middle)) {
+            return false;
+        }
+
+        $wi = array(7, 9, 10, 5, 8, 4, 2, 1, 6, 3, 7, 9, 10, 5, 8, 4, 2);
+        $mapping = array(0 => 1, 1 => 0, 2 => 'x', 3 => 9, 4 => 8, 5 => 7, 6 => 6, 7 => 5, 8 => 4, 9 => 3, 10 => 2);
+
+        $sum = 0;
+        for ($i = 0; $i < 17; $i ++) {
+            $sum += $value{$i} * $wi[$i];
+        }
+
+        $mod = intval(gmp_mod($sum, 11));
+
+        $last = $mapping[$mod];
+
+        if ($value{17} != $last) {
+            return false;
+        }
+
+        return true;
+    }
 }
