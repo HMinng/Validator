@@ -26,7 +26,7 @@ abstract class AtsRuleBaseClass
 			return $validator->getFallbackMessage();
 		}
 
-        self::$verifiedAttribute = $validator->getFallbackMessage();
+        self::$verifiedAttribute = $validator->getVerifiedAttribute();
 
 		return true;
 	}
