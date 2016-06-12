@@ -37,6 +37,13 @@ class Validator
     protected $scene;
 
     /**
+     * Properties that have been verified
+     *
+     * @var array
+     */
+    protected $verifiedAttribute = array();
+
+    /**
      * The files under validation.
      *
      * @var array
@@ -217,6 +224,10 @@ class Validator
         $validatable = $this->isValidatable($rule, $attribute, $value);
 
         $method = "validate{$rule}";
+
+        if ($validatable) {
+            $this->verifiedAttribute[] = $attribute;
+        }
 
         if ($validatable && ! $this->$method($attribute, $value, $parameters, $this)) {
             $this->addFailure($attribute, $rule, $parameters);
@@ -1374,13 +1385,13 @@ class Validator
      */
     protected function validateID($attribute, $value)
     {
-        $address = yaml_parse_file(APPLICATION_PATH . '/../conf/custom/area.yml');
+//        $address = yaml_parse_file(APPLICATION_PATH . '/../conf/custom/area.yml');
 
         if ( ! $attribute) {
             return false;
         }
 
-        if ( ! is_numeric($value)) {
+        if ( !  preg_match('/^[\dxX]{18}$/', $value)) {
             return false;
         }
 
@@ -1392,21 +1403,21 @@ class Validator
             return false;
         }
 
-        $province = $value{0} . $value{1} . '0000';
-        $city = $value{0} . $value{1} . $value{2} . $value{3} . '00';
-        $area = $value{0} . $value{1} . $value{2} . $value{3} . $value{4} . $value{5};
+//        $province = $value{0} . $value{1} . '0000';
+//        $city = $value{0} . $value{1} . $value{2} . $value{3} . '00';
+//        $area = $value{0} . $value{1} . $value{2} . $value{3} . $value{4} . $value{5};
 
-        if ( ! array_key_exists($province, $address['is_card']['province'])) {
-            return false;
-        }
-
-        if ( ! array_key_exists($city, $address['is_card']['city'][$province])) {
-            return false;
-        }
-
-        if ( ! array_key_exists($area, $address['is_card']['area'][$city])) {
-           return false;
-        }
+//        if ( ! array_key_exists($province, $address['is_card']['province'])) {
+//            return false;
+//        }
+//
+//        if ( ! array_key_exists($city, $address['is_card']['city'][$province])) {
+//            return false;
+//        }
+//
+//        if ( ! array_key_exists($area, $address['is_card']['area'][$city])) {
+//           return false;
+//        }
 
         $middle = substr($value, 6, 11);
 
@@ -1428,10 +1439,26 @@ class Validator
 
         $last = $mapping[$mod];
 
-        if ($value{17} != $last) {
+        if (strtolower($value{17}) != $last) {
             return false;
         }
 
         return true;
+    }
+
+    /**
+     * Verify that a property is an ID number.
+     *
+     * @param  string  $attribute
+     * @param  mixed   $value
+     * @param  mixed   $parameters
+     * @return bool
+     */
+    protected function validateLength($attribute, $value, $parameters)
+    {
+        $this->requireParameterCount(1, $parameters, 'length');
+
+
+        return $this->getStringSize($value) <= $parameters[0];
     }
 }

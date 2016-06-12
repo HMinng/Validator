@@ -7,6 +7,8 @@ abstract class AtsRuleBaseClass
 	
 	protected static function messages(){}
 
+    private static $verifiedAttribute = array();
+
     protected static function setPresenceVerifier(\HMinng\Validator\Base\Validator $validator)
     {
         return true;
@@ -26,4 +28,13 @@ abstract class AtsRuleBaseClass
 		
 		return true;
 	}
+
+    protected static function getVerifiedAttribute()
+    {
+        $verifiedAttribute = self::$verifiedAttribute;
+
+        self::$verifiedAttribute = array();
+
+        return $verifiedAttribute;
+    }
 }
