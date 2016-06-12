@@ -234,7 +234,7 @@ class Validator
 
         $method = "validate{$rule}";
 
-        if ($validatable) {
+        if ($validatable && ! in_array($attribute, $this->verifiedAttribute)) {
             $this->verifiedAttribute[] = $attribute;
         }
 
