@@ -25,11 +25,13 @@ abstract class AtsRuleBaseClass
 		if ($validator->fails()) {
 			return $validator->getFallbackMessage();
 		}
-		
+
+        self::$verifiedAttribute = $validator->getFallbackMessage();
+
 		return true;
 	}
 
-    protected static function getVerifiedAttribute()
+    public static function getVerifiedAttribute()
     {
         $verifiedAttribute = self::$verifiedAttribute;
 

@@ -204,6 +204,15 @@ class Validator
     }
 
     /**
+     * return verified attribute
+     * @return array
+     */
+    public function getVerifiedAttribute()
+    {
+        return $this->verifiedAttribute;
+    }
+
+    /**
      * Validate a given attribute against a rule.
      *
      * @param  string  $attribute
