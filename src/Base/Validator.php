@@ -1400,6 +1400,8 @@ class Validator
             return false;
         }
 
+        $value = strval($value);
+
         if ( !  preg_match('/^[\dxX]{18}$/', $value)) {
             return false;
         }
