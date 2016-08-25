@@ -368,6 +368,8 @@ class Validator
      */
     protected function validateRequired($attribute, $value)
     {
+        $value = trim($value);
+
         if ( ! $attribute || empty($value)) {
             return false;
         }
