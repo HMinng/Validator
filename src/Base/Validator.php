@@ -304,6 +304,13 @@ class Validator
     protected function passesOptionalCheck($attribute)
     {
         if ($this->hasRule($attribute, array('Sometimes'))) {
+            foreach ($this->rules[$attribute] as $rule) {
+                list($rule, $parameters) = $this->parseRule($rule);
+        
+                if ($rule == 'Sometimes' && in_array($this->scene, $parameters)) {
+                    return true;
+                }
+            }
             return array_key_exists($attribute, $this->data);
         }
 
