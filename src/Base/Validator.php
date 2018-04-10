@@ -379,7 +379,7 @@ class Validator
             $value = trim($value);
         }
 
-        if ( ! $attribute || empty($value)) {
+        if ( ! $attribute ) {
             return false;
         }
 
