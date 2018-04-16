@@ -381,11 +381,9 @@ class Validator
             return false;
         }
         
-        if (is_integer($value) || is_float($value)) {
-            return true;
-        }
+        $tmpValue = function_exists('mb_strlen') ? mb_strlen($value) : strlen($value);
         
-        if (empty($value)) {
+        if ($tmpValue == 0) {
             return false;
         }
         
